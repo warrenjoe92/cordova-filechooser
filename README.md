@@ -9,7 +9,7 @@ Install with Cordova CLI
 Install with Plugman 
 
 	$ plugman --platform android --project /path/to/project \ 
-		--plugin http://github.com/don/cordova-filechooser.git
+		--plugin https://github.com/warrenjoe92/cordova-filechooser
 
 API
 
