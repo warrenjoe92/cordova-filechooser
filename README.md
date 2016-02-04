@@ -17,8 +17,9 @@ API
 
 The success callback get the uri of the selected file
 
-	fileChooser.open(function(uri) {
-		alert(uri);
+	fileChooser.open(function(file) {
+		console.log('uri', file.uri);
+		console.log('file name', file.filename);
 	});
 	
 Screenshot
