@@ -4,7 +4,7 @@ Requires Cordova >= 2.8.0
 
 Install with Cordova CLI
 	
-	$ cordova plugin add http://github.com/don/cordova-filechooser.git
+	$ cordova plugin add https://github.com/warrenjoe92/cordova-filechooser
 
 Install with Plugman 
 
