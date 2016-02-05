@@ -64,9 +64,11 @@ public class FileChooser extends CordovaPlugin {
 
                   try{
                     String displayName = getFileName(uri);
+                    String mimeType = getMimeType(uri);
                     JSONObject json = new JSONObject();
                     json.put("uri", uri.toString());
                     json.put("filename", displayName);
+                    json.put("mimeType", mimeType);
                     callback.success(json);
                   }catch(JSONException e){
                     callback.error("JSON error");
@@ -87,6 +89,11 @@ public class FileChooser extends CordovaPlugin {
                 callback.error(resultCode);
             }
         }
+    }
+
+    private String getMimeType(Uri uri){
+      Context c = this.cordova.getActivity().getApplicationContext();
+      return c.getContentResolver().getType(uri);
     }
 
     private String getFileName(Uri uri){
