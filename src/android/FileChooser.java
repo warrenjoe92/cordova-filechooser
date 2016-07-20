@@ -35,6 +35,8 @@ public class FileChooser extends CordovaPlugin {
 
     public void chooseFile(CallbackContext callbackContext) {
 
+        Log.v(TAG, "choosing file");
+
         // type and title should be configurable
 
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -45,30 +47,50 @@ public class FileChooser extends CordovaPlugin {
         Intent chooser = Intent.createChooser(intent, "Select File");
         cordova.startActivityForResult(this, chooser, PICK_FILE_REQUEST);
 
+        // Log.v(TAG, "activity started");
+
         PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
         pluginResult.setKeepCallback(true);
         callback = callbackContext;
         callbackContext.sendPluginResult(pluginResult);
+
+        // Log.v(TAG, "sending plugin result");
+
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+      Log.v(TAG, "on activity result");
+
         if (requestCode == PICK_FILE_REQUEST && callback != null) {
+
+          Log.v(TAG, "pick file request");
 
             if (resultCode == Activity.RESULT_OK) {
 
+              Log.v(TAG, "activity result ok");
+
                 Uri uri = data.getData();
+
+                Log.v(TAG, "got data");
 
                 if (uri != null) {
 
                   try{
+
+                    Log.v(TAG, "uri not null, getting info");
+
                     String displayName = getFileName(uri);
                     String mimeType = getMimeType(uri);
                     JSONObject json = new JSONObject();
                     json.put("uri", uri.toString());
                     json.put("filename", displayName);
                     json.put("mimeType", mimeType);
+
+                    Log.v(TAG, "got all info: " + displayName + " " + mimeType);
+                    Log.v(TAG, "executing callback");
+
                     callback.success(json);
                   }catch(JSONException e){
                     callback.error("JSON error");
@@ -80,11 +102,15 @@ public class FileChooser extends CordovaPlugin {
 
             } else if (resultCode == Activity.RESULT_CANCELED) {
 
+              Log.v(TAG, "activity result cancelled");
+
                 // TODO NO_RESULT or error callback?
                 PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
                 callback.sendPluginResult(pluginResult);
 
             } else {
+
+              Log.v(TAG, "activity result error");
 
                 callback.error(resultCode);
             }
@@ -92,11 +118,17 @@ public class FileChooser extends CordovaPlugin {
     }
 
     private String getMimeType(Uri uri){
+
+      Log.v(TAG, "get mime type");
+
       Context c = this.cordova.getActivity().getApplicationContext();
       return c.getContentResolver().getType(uri);
     }
 
     private String getFileName(Uri uri){
+
+      Log.v(TAG, "get file name");
+
       Context c = this.cordova.getActivity().getApplicationContext();
       Cursor cursor = c.getContentResolver().query(uri, null, null, null, null, null);
       try {
@@ -107,7 +139,7 @@ public class FileChooser extends CordovaPlugin {
               // Note it's called "Display Name".  This is
               // provider-specific, and might not necessarily be the file name.
               String displayName = cursor.getString(
-                      cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                      cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)); //causes NULL_POINTER exception on some devices
 
               // int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
               // If the size is unknown, the value stored is null.  But since an
@@ -127,9 +159,16 @@ public class FileChooser extends CordovaPlugin {
 
               return displayName;
           }
-      } finally {
-          cursor.close();
+      } catch (NullPointerException exc) {
+          Log.w(TAG, "null pointer exception");
+      }finally {
+          try{
+              cursor.close();
+          }
+          catch (NullPointerException exc) {
+              Log.w(TAG, "null pointer exception");
+          }
       }
-      return "";
+      return null;
     }
 }
